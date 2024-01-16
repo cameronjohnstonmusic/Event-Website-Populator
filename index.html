@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+
+</head>
+
+
+
+<body>
+
+    <style>
+        /* Add some styling for better appearance */
+        #data-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #data-table th,
+        #data-table td {
+            padding: 10px;
+            border: 1px solid #000000;
+        }
+
+        /* Style for hyperlinks */
+        #data-table a {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+
+    <label for="sheet-dropdown">Select Sheet:</label>
+    <select id="sheet-dropdown" onchange="loadSheetData()">
+        <option value="FCCLA">FCCLA</option>
+        <option value="USC">USC</option>
+        <option value="Freelance">Freelance</option>
+        <!-- Add more options for each sheet -->
+    </select>
+
+    <br>
+    <br>
+
+    <table id="data-table">
+        <!-- Table header -->
+        <thead>
+            <tr>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <!-- Table body -->
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Replace with your actual spreadsheet ID and API key
+        const spreadsheetId = '1TCgJ_U-HAP4jFAjRWrBKs0_PfrIWj3oK3VnWBd1S0bs';
+        const apiKey = 'AIzaSyDA-FgS8BiC6h95Op1T3gNtgfHyWKgKBGE';
+
+        function loadSheetData() {
+            // Get the selected sheet from the dropdown
+            const selectedSheet = document.getElementById('sheet-dropdown').value;
+
+            // Google Sheets API endpoint
+            const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${selectedSheet}?key=${apiKey}`;
+
+            // Fetch data from Google Sheets API
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Get the table body
+                    const tbody = document.querySelector('#data-table tbody');
+                    // Clear existing rows
+                    tbody.innerHTML = '';
+
+                    // Iterate through each row in the data
+                    data.values.forEach(row => {
+                        // Create a table row
+                        const tr = document.createElement('tr');
+
+                        // Display the selected number of columns
+                        for (let i = 0; i < 6; i++) {
+                            // Create a table cell
+                            const td = document.createElement('td');
+                            // Check if the cell contains a link
+                            if (row[i] && row[i].startsWith('http')) {
+                                // Extract the website name from the link
+                                const linkText = getWebsiteName(row[i]);
+                                // Create a hyperlink
+                                const link = document.createElement('a');
+                                link.href = row[i];
+                                link.target = '_blank'; // Open link in a new tab
+                                link.textContent = linkText || 'Link';
+                                td.appendChild(link);
+                            } else {
+                                // Set the cell content normally
+                                td.textContent = row[i] || ''; // Display empty string if cell value is undefined
+                            }
+                            // Append the cell to the row
+                            tr.appendChild(td);
+                        }
+
+                        // Append the row to the table body
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+            console.log(selectedSheet);
+        }
+
+        // Function to extract the website name from a URL
+        function getWebsiteName(url) {
+            const matches = url.match(/^https?\:\/\/(?:www\.)?([^\/?#]+)(?:[\/?#]|$)/i);
+            return matches && matches[1];
+        }
+
+        // Load initial data
+        loadSheetData();
+    </script>
+
+</body>
+
+</html>
