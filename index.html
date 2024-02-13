@@ -8,6 +8,7 @@
 
 </head>
 
+
 <body>
     <style>
         /* Add some styling for better appearance */
@@ -40,16 +41,23 @@
 
         /* Style for images */
         #data-table img {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 300px;
+            max-height: 300px;
         }
     </style>
-    <select id="sheet-dropdown" onchange="loadSheetData()">
-        <option value="FCCLA">FCCLA</option>
-        <option value="USC">USC</option>
-        <option value="Freelance">Freelance</option>
-        <!-- Add more options for each sheet -->
-    </select>
+
+    <p> Select Company:
+
+        <select id="sheet-dropdown" onchange="loadSheetData()">
+            <option value="FCCLA">FCCLA</option>
+            <option value="USC">USC</option>
+            <option value="Freelance">Freelance</option>
+            <!-- Add more options for each sheet -->
+        </select>
+
+    </p>
+
+    <br>
 
     <div id="table-container">
         <table id="data-table">
@@ -69,6 +77,31 @@
         // Replace with your actual spreadsheet ID and API key
         const spreadsheetId = '1TCgJ_U-HAP4jFAjRWrBKs0_PfrIWj3oK3VnWBd1S0bs';
         const apiKey = 'AIzaSyDA-FgS8BiC6h95Op1T3gNtgfHyWKgKBGE';
+
+        // Function to extract the website name from a URL
+        function getWebsiteName(url) {
+            if (url.startsWith('http')) {
+                const matches = url.match(/^https?\:\/\/(?:www\.)?([^\/?#]+)(?:[\/?#]|$)/i);
+                if (matches && matches.length > 1) {
+                    const domain = matches[1];
+                    // Map common domains to their corresponding names
+                    const domainMap = {
+                        'youtube.com': 'YouTube',
+                        'facebook.com': 'Facebook',
+                        'instagram.com': 'Instagram',
+                        // Add more mappings as needed
+                    };
+                    // Check if the domain has a mapping
+                    if (domainMap[domain]) {
+                        return domainMap[domain];
+                    }
+                    // Return the domain if no mapping is found
+                    return domain;
+                }
+            }
+            // Return the original URL if it doesn't match the expected pattern
+            return url;
+        }
 
         function loadSheetData() {
             // Get the selected sheet from the dropdown
@@ -105,17 +138,23 @@
                                 if (row[i].startsWith('http')) {
                                     // Check if the link is a Squarespace image URL
                                     if (row[i].includes('squarespace-cdn.com')) {
-                                        // Create an image element
-                                        const img = document.createElement('img');
-                                        img.src = row[i];
-                                        // Append the image to the cell
-                                        td.appendChild(img);
-                                    } else {
-                                        // Create a hyperlink
+                                        // Create an anchor element
                                         const link = document.createElement('a');
                                         link.href = row[i];
                                         link.target = '_blank'; // Open link in a new tab
-                                        link.textContent = 'Link';
+                                        // Create an image element
+                                        const img = document.createElement('img');
+                                        img.src = row[i];
+                                        // Append the image to the anchor
+                                        link.appendChild(img);
+                                        // Append the anchor to the cell
+                                        td.appendChild(link);
+                                    } else {
+                                        // Create a hyperlink with the website name
+                                        const link = document.createElement('a');
+                                        link.href = row[i];
+                                        link.target = '_blank'; // Open link in a new tab
+                                        link.textContent = getWebsiteName(row[i]);
                                         // Append the hyperlink to the cell
                                         td.appendChild(link);
                                     }
@@ -144,5 +183,6 @@
         loadSheetData();
     </script>
 </body>
+
 
 </html>
